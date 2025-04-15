@@ -1,0 +1,16 @@
+services:
+  db:
+    image: postgres:17
+    container_name: mephi_practicum_lottery
+    restart: always
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: mephi_practicum_lottery
+    ports:
+      - "5436:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+
+volumes:
+  pg_data:
