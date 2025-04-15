@@ -2,8 +2,12 @@ package org.mephi_kotlin_band.lottery.core.logging;
 
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;
+import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.*;
 import org.aspectj.lang.reflect.MethodSignature;
+import org.mephi_kotlin_band.lottery.features.user.model.CustomUserDetails;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
@@ -77,5 +81,38 @@ public class LoggingAspect {
                   methodSignature.getDeclaringType().getSimpleName(),
                   methodSignature.getName(),
                   ex.getMessage(), ex);
+    }
+
+    @Around("execution(* org.mephi_kotlin_band.lottery..*(..)) && " +
+            "!execution(* *.toString(..)) && " +
+            "!target(org.mephi_kotlin_band.lottery.features.user.config.JwtAuthenticationFilter)")
+    public Object logExecutionDetails(ProceedingJoinPoint joinPoint) throws Throwable {
+        long start = System.currentTimeMillis();
+        Object result = null;
+        Exception ex = null;
+
+        String userId = "anonymous";
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null && auth.isAuthenticated() && auth.getPrincipal() instanceof CustomUserDetails customUser) {
+            userId = customUser.getId().toString();
+        }
+
+        try {
+            result = joinPoint.proceed();
+            return result;
+        } catch (Exception e) {
+            ex = e;
+            throw e;
+        } finally {
+            long duration = System.currentTimeMillis() - start;
+            log.info("✅ Method: {}, Args: {}, UserID: {}, Duration: {} ms, Result: {}, Exception: {}",
+                     joinPoint.getSignature(),
+                     Arrays.toString(joinPoint.getArgs()),
+                     userId,
+                     duration,
+                     result,
+                     ex != null ? ex.getMessage() : "none"
+            );
+        }
     }
 }
