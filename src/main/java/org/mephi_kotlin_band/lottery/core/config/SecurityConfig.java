@@ -1,25 +1,21 @@
 package org.mephi_kotlin_band.lottery.core.config;
 
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.mephi_kotlin_band.lottery.core.logging.CustomAccessDeniedHandler;
 import org.mephi_kotlin_band.lottery.core.logging.CustomAuthenticationEntryPoint;
 import org.mephi_kotlin_band.lottery.features.user.config.JwtAuthenticationFilter;
-import org.mephi_kotlin_band.lottery.features.user.service.CustomUserDetailsService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+@EnableMethodSecurity
 @Configuration
 public class SecurityConfig {
-    @Bean
-    public UserDetailsService userDetailsService(CustomUserDetailsService customUserDetailsService) {
-        return customUserDetailsService;
-    }
 
     @Bean
     public SecurityFilterChain securityFilterChain(
