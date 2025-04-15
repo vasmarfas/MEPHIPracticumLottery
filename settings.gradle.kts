@@ -1,2 +1,1 @@
-rootProject.name = "MEPHIPracticumLottery"
-
+rootProject.name = "otp-service"

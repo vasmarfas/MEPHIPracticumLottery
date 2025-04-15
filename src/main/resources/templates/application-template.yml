@@ -1,0 +1,33 @@
+server:
+  port: 8080
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5436/mephi_practicum_lottery
+    username: your_db_user
+    password: your_db_password
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+jwt:
+  secret: YOUR_BASE64_ENCODED_SECRET
+  expiration: 86400000
+
+smpp:
+  host: localhost
+  port: 2775
+  system-id: smppclient1
+  password: password
+  system-type: OTP
+  source-addr: OTPService
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operationsSorter: method
+    tagsSorter: alpha
