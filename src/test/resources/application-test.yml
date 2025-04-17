@@ -1,0 +1,31 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:testdb
+    username: sa
+    password: password
+    driver-class-name: org.h2.Driver
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+  flyway:
+    enabled: false
+
+jwt:
+  secret: 4D6251655468576D5A7134743777217A25432A462D4A614E645267556B587032
+  expiration: 3600000
+
+telegram:
+  bot:
+    token: test-token
+  admin:
+    chatId: test-chat-id
+
+lottery:
+  admin:
+    email: admin@test.com
+  referral:
+    bonus:
+      amount: 100.0 
