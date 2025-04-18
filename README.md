@@ -6,443 +6,358 @@
 
 - Аутентификация пользователей с помощью JWT
 - Разграничение прав доступа (USER, ADMIN)
-- Управление лотерейными тиражами
-- Покупка и валидация билетов
-- Обработка платежей
-- Определение результатов тиражей
-- Экспорт данных (CSV/JSON)
-- Статистика и история пользователей
+- Управление лотерейными тиражами (создание, активация, завершение, отмена)
+- Покупка и валидация билетов (с выбором чисел пользователем)
+- Обработка платежей и интеграция с платежной системой
+- Определение результатов тиражей и начисление выигрышей
+- Экспорт данных и статистики в CSV/JSON
+- История и отчетность для пользователей и администраторов
 
 ## Технологический стек
 
-- Java 23
-- Spring Boot 3.x
+- Java 17
+- Spring Boot 3.4
 - PostgreSQL 17
 - Spring Security с JWT
 - Spring Data JPA
 - Flyway для миграций базы данных
-- Docker для контейнеризации
+- Docker и Docker Compose для контейнеризации
+
+## Основные компоненты системы
+
+### Тиражная служба (Draw Service)
+
+- Управление лотерейными тиражами и их статусами
+- Автоматическое определение результатов
+- Поддержка разных типов лотерей ("5 из 36", "6 из 45")
+
+### Служба билетов (Ticket Service)
+
+- Создание и валидация билетов
+- Проверка статуса билетов
+- История билетов пользователя
+
+### Шлюз оплаты (Payment Service)
+
+- Обработка платежей за билеты
+- Интеграция с платежной системой
+- Поддержка двухэтапной (инвойс → оплата) и одноэтапной оплаты
+
+### Служба результатов (Draw Result Service)
+
+- Генерация выигрышных комбинаций
+- Определение выигрышных билетов
+- Уведомления о результатах
+
+### Служба экспорта (Export Service)
+
+- Формирование отчетов по тиражам
+- Экспорт статистики в CSV/JSON
+- Отчетность для пользователей и администраторов
 
 ## Начало работы
 
 ### Требования
 
-- Java 23 JDK
+- Java 17 JDK
 - Docker и Docker Compose
-- Gradle
+- Gradle 8.5+
 
 ### Запуск приложения
 
 1. Клонируйте репозиторий:
-```
+```bash
 git clone https://github.com/yourusername/MEPHIPracticumLottery.git
 cd MEPHIPracticumLottery
 ```
 
-2. Запустите PostgreSQL с помощью Docker Compose:
-```
+2. Запустите приложение с Docker Compose:
+```bash
 docker-compose up -d
-```
-
-3. Соберите и запустите приложение:
-```
-./gradlew clean build
-./gradlew bootRun
 ```
 
 Приложение будет доступно по адресу http://localhost:8088
 
-### Документация API
+### API документация
 
 Swagger UI доступен по адресу http://localhost:8088/swagger-ui.html
 
-#### Как использовать Swagger UI
+## Основные API эндпоинты
 
-1. Откройте Swagger UI в браузере: http://localhost:8088/swagger-ui.html
-2. Для авторизации:
-   - Выполните запрос POST `/api/auth/login` с вашими учетными данными
-   - Скопируйте полученный token
-   - Нажмите кнопку "Authorize" в правом верхнем углу
-   - Введите токен в формате `Bearer {полученный_токен}` и нажмите "Authorize"
-3. После авторизации все API методы станут доступны для тестирования
+### Аутентификация
 
-## Подробная документация API
+- **POST /api/auth/register** - Регистрация нового пользователя
+- **POST /api/auth/login** - Вход в систему, получение JWT токена
 
-> **Важно:** Все API-запросы, кроме авторизации, требуют JWT-токен в заголовке Authorization: `Bearer {token}`
+### Тиражи
+
+- **GET /api/draws** - Получение списка всех тиражей
+- **GET /api/draws/active** - Получение списка активных тиражей
+- **GET /api/draws/{id}** - Получение информации о тираже
+- **POST /api/admin/draws** - Создание нового тиража (требуется роль ADMIN)
+- **PUT /api/admin/draws/{id}/cancel** - Отмена тиража (требуется роль ADMIN)
+
+### Билеты
+
+- **POST /api/tickets/purchase** - Покупка билета в один шаг (выбор тиража, чисел и оплата)
+- **GET /api/tickets** - Получение списка билетов пользователя
+- **GET /api/tickets/{id}** - Получение информации о билете
+- **GET /api/tickets/{id}/check-result** - Проверка результата билета
+
+### Оплата (2-х этапный процесс)
+
+- **POST /api/invoice** - Создание инвойса для билета
+- **POST /api/payments** - Оплата инвойса
+
+### Результаты
+
+- **GET /api/draws/{id}/results** - Получение результатов тиража
+- **POST /api/admin/draws/{id}/generate-result** - Генерация результатов тиража (требуется роль ADMIN)
+
+### Экспорт
+
+- **GET /api/draws/{id}/export/csv** - Экспорт результатов тиража в CSV
+- **GET /api/draws/{id}/export/json** - Экспорт результатов тиража в JSON
+- **GET /api/users/{userId}/history/csv** - Экспорт истории пользователя в CSV
+- **GET /api/users/{userId}/history/json** - Экспорт истории пользователя в JSON
+
+## Примеры API запросов
 
 ### Аутентификация
 
 #### Регистрация нового пользователя
-- **Метод**: POST 
-- **URL**: `/api/auth/register`
-- **Тело запроса**: 
-  ```json
-  {
-    "username": "user@example.com",
-    "password": "password123"
-  }
-  ```
-- **Пример выполнения**:
-  ```bash
-  curl -X POST 'http://localhost:8088/api/auth/register' \
-    -H 'Content-Type: application/json' \
-    -d '{"username":"user@example.com","password":"password123"}'
-  ```
-- **Ответ**: 
-  ```json
-  {
-    "message": "User registered successfully"
-  }
-  ```
-- **Описание**: Регистрирует нового пользователя. Первый зарегистрированный пользователь автоматически получает роль ADMIN.
+```
+POST /api/auth/register
+Content-Type: application/json
 
-#### Аутентификация пользователя
-- **Метод**: POST 
-- **URL**: `/api/auth/login`
-- **Тело запроса**: 
-  ```json
-  {
-    "username": "user@example.com",
-    "password": "password123"
-  }
-  ```
-- **Пример выполнения**:
-  ```bash
-  curl -X POST 'http://localhost:8088/api/auth/login' \
-    -H 'Content-Type: application/json' \
-    -d '{"username":"user@example.com","password":"password123"}'
-  ```
-- **Ответ**: 
-  ```json
-  {
-    "message": "Login successful",
-    "token": "eyJhbGciOiJIUzI1NiJ9..."
-  }
-  ```
-- **Описание**: Аутентифицирует пользователя и возвращает JWT токен для дальнейших запросов.
+{
+  "username": "user@example.com",
+  "password": "password123",
+  "firstName": "Иван",
+  "lastName": "Иванов"
+}
+```
+
+Ответ (200 OK):
+```json
+{
+  "message": "Пользователь успешно зарегистрирован"
+}
+```
+
+#### Авторизация и получение токена
+```
+POST /api/auth/login
+Content-Type: application/json
+
+{
+  "username": "user@example.com",
+  "password": "password123"
+}
+```
+
+Ответ (200 OK):
+```json
+{
+  "token": "eyJhbGciOiJIUzI1NiJ9...",
+  "username": "user@example.com"
+}
+```
 
 ### Тиражи
 
-#### Получение всех тиражей
-- **Метод**: GET 
-- **URL**: `/api/draws`
-- **Пример выполнения**:
-  ```bash
-  curl -X GET 'http://localhost:8088/api/draws' \
-    -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiJ9...'
-  ```
-- **Ответ**: Список всех тиражей в системе
-- **Описание**: Возвращает все тиражи, доступные в системе.
+#### Создание нового тиража (ADMIN)
+```
+POST /api/admin/draws
+Content-Type: application/json
+Authorization: Bearer {token}
+
+{
+  "lotteryType": "FIVE_OUT_OF_36",
+  "startTime": "2024-06-01T12:00:00",
+  "endTime": "2024-06-01T18:00:00",
+  "ticketPrice": 100.00
+}
+```
+
+Ответ (201 Created):
+```json
+{
+  "id": "550e8400-e29b-41d4-a716-446655440000",
+  "lotteryType": "FIVE_OUT_OF_36",
+  "startTime": "2024-06-01T12:00:00",
+  "endTime": "2024-06-01T18:00:00",
+  "status": "ACTIVE",
+  "ticketPrice": 100.00
+}
+```
 
 #### Получение активных тиражей
-- **Метод**: GET 
-- **URL**: `/api/draws/active`
-- **Пример выполнения**:
-  ```bash
-  curl -X GET 'http://localhost:8088/api/draws/active' \
-    -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiJ9...'
-  ```
-- **Ответ**: Список активных тиражей
-- **Описание**: Возвращает только активные тиражи, на которые можно покупать билеты.
+```
+GET /api/draws/active
+Authorization: Bearer {token}
+```
 
-#### Получение тиража по ID
-- **Метод**: GET 
-- **URL**: `/api/draws/{id}`
-- **Параметры пути**: 
-  - `id`: UUID идентификатор тиража
-- **Пример выполнения**:
-  ```bash
-  curl -X GET 'http://localhost:8088/api/draws/550e8400-e29b-41d4-a716-446655440000' \
-    -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiJ9...'
-  ```
-- **Ответ**: Информация о запрошенном тираже
-- **Описание**: Возвращает детальную информацию о тираже по его ID.
-
-#### Создание нового тиража (только для ADMIN)
-- **Метод**: POST 
-- **URL**: `/api/admin/draws`
-- **Тело запроса**: 
-  ```json
+Ответ (200 OK):
+```json
+[
   {
+    "id": "550e8400-e29b-41d4-a716-446655440000",
     "lotteryType": "FIVE_OUT_OF_36",
-    "startTime": "2024-05-20T12:00:00"
+    "startTime": "2024-06-01T12:00:00",
+    "endTime": "2024-06-01T18:00:00",
+    "status": "ACTIVE",
+    "ticketPrice": 100.00
   }
-  ```
-- **Пример выполнения**:
-  ```bash
-  curl -X POST 'http://localhost:8088/api/admin/draws' \
-    -H 'Content-Type: application/json' \
-    -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiJ9...' \
-    -d '{"lotteryType":"FIVE_OUT_OF_36","startTime":"2024-05-20T12:00:00"}'
-  ```
-- **Ответ**: Созданный тираж
-- **Описание**: Создает новый тираж. Доступно только администраторам. Типы лотерей: FIVE_OUT_OF_36, SIX_OUT_OF_45, SEVEN_OUT_OF_49.
+]
+```
 
-#### Отмена тиража (только для ADMIN)
-- **Метод**: PUT 
-- **URL**: `/api/admin/draws/{id}/cancel`
-- **Параметры пути**: 
-  - `id`: UUID идентификатор тиража
-- **Пример выполнения**:
-  ```bash
-  curl -X PUT 'http://localhost:8088/api/admin/draws/550e8400-e29b-41d4-a716-446655440000/cancel' \
-    -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiJ9...'
-  ```
-- **Ответ**: Обновленный статус тиража
-- **Описание**: Отменяет тираж. Доступно только администраторам.
+### Покупка билетов
 
-### Билеты
+#### Способ 1: Покупка билета в один шаг
+```
+POST /api/tickets/purchase
+Content-Type: application/json
+Authorization: Bearer {token}
 
-#### Получение билетов текущего пользователя
-- **Метод**: GET 
-- **URL**: `/api/tickets`
-- **Пример выполнения**:
-  ```bash
-  curl -X GET 'http://localhost:8088/api/tickets' \
-    -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiJ9...'
-  ```
-- **Ответ**: Список билетов пользователя
-- **Описание**: Возвращает все билеты, принадлежащие текущему пользователю.
+{
+  "drawId": "550e8400-e29b-41d4-a716-446655440000",
+  "numbers": "5,12,18,24,36",
+  "cardNumber": "4242424242424242",
+  "cvc": "123"
+}
+```
 
-#### Получение билета по ID
-- **Метод**: GET 
-- **URL**: `/api/tickets/{id}`
-- **Параметры пути**: 
-  - `id`: UUID идентификатор билета
-- **Пример выполнения**:
-  ```bash
-  curl -X GET 'http://localhost:8088/api/tickets/550e8400-e29b-41d4-a716-446655440000' \
-    -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiJ9...'
-  ```
-- **Ответ**: Информация о билете
-- **Описание**: Возвращает детальную информацию о билете по его ID.
+Ответ (201 Created):
+```json
+{
+  "id": "661f9511-f38c-52e5-b817-557766551111",
+  "userId": "772fa622-g49d-63f6-c928-668877662222",
+  "drawId": "550e8400-e29b-41d4-a716-446655440000",
+  "numbers": "5,12,18,24,36",
+  "status": "PENDING",
+  "createdAt": "2024-05-20T10:15:30"
+}
+```
 
-#### Получение билетов пользователя для тиража
-- **Метод**: GET 
-- **URL**: `/api/draws/{drawId}/tickets`
-- **Параметры пути**: 
-  - `drawId`: UUID идентификатор тиража
-- **Пример выполнения**:
-  ```bash
-  curl -X GET 'http://localhost:8088/api/draws/550e8400-e29b-41d4-a716-446655440000/tickets' \
-    -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiJ9...'
-  ```
-- **Ответ**: Список билетов пользователя для указанного тиража
-- **Описание**: Возвращает все билеты текущего пользователя для конкретного тиража.
+#### Способ 2: Двухэтапная покупка
 
-#### Получение истории билетов текущего пользователя
-- **Метод**: GET 
-- **URL**: `/api/users/me/history`
-- **Пример выполнения**:
-  ```bash
-  curl -X GET 'http://localhost:8088/api/users/me/history' \
-    -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiJ9...'
-  ```
-- **Ответ**: История покупок билетов пользователя
-- **Описание**: Возвращает историю покупок билетов текущего пользователя.
+##### Шаг 1: Создание билета
+```
+POST /api/tickets
+Content-Type: application/json
+Authorization: Bearer {token}
 
-### Результаты тиражей
+{
+  "drawId": "550e8400-e29b-41d4-a716-446655440000",
+  "numbers": "7,14,21,28,35"
+}
+```
 
-#### Получение результатов тиража
-- **Метод**: GET 
-- **URL**: `/api/draws/{drawId}/results`
-- **Параметры пути**: 
-  - `drawId`: UUID идентификатор тиража
-- **Пример выполнения**:
-  ```bash
-  curl -X GET 'http://localhost:8088/api/draws/550e8400-e29b-41d4-a716-446655440000/results' \
-    -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiJ9...'
-  ```
-- **Ответ**: Результаты розыгрыша
-- **Описание**: Возвращает результаты проведенного тиража.
+Ответ (201 Created):
+```json
+{
+  "id": "661f9511-f38c-52e5-b817-557766551112",
+  "userId": "772fa622-g49d-63f6-c928-668877662222",
+  "drawId": "550e8400-e29b-41d4-a716-446655440000",
+  "numbers": "7,14,21,28,35",
+  "status": "CREATED",
+  "createdAt": "2024-05-20T10:16:30"
+}
+```
 
-#### Проверка результата билета
-- **Метод**: GET 
-- **URL**: `/api/tickets/{ticketId}/check-result`
-- **Параметры пути**: 
-  - `ticketId`: UUID идентификатор билета
-- **Пример выполнения**:
-  ```bash
-  curl -X GET 'http://localhost:8088/api/tickets/550e8400-e29b-41d4-a716-446655440000/check-result' \
-    -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiJ9...'
-  ```
-- **Ответ**: Результат проверки билета
-- **Описание**: Проверяет результат конкретного билета в тираже.
+##### Шаг 2: Создание инвойса
+```
+POST /api/invoice
+Content-Type: application/json
+Authorization: Bearer {token}
 
-#### Генерация результата тиража (только для ADMIN)
-- **Метод**: POST 
-- **URL**: `/api/admin/draws/{drawId}/generate-result`
-- **Параметры пути**: 
-  - `drawId`: UUID идентификатор тиража
-- **Пример выполнения**:
-  ```bash
-  curl -X POST 'http://localhost:8088/api/admin/draws/550e8400-e29b-41d4-a716-446655440000/generate-result' \
-    -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiJ9...'
-  ```
-- **Ответ**: Сгенерированные результаты тиража
-- **Описание**: Генерирует результаты тиража. Доступно только администраторам.
+{
+  "ticketData": "{\"drawId\":\"550e8400-e29b-41d4-a716-446655440000\",\"numbers\":\"7,14,21,28,35\"}",
+  "amount": 100.0
+}
+```
+
+Ответ (201 Created):
+```json
+{
+  "id": "883g0622-h50e-63f6-c928-779988773333",
+  "ticketData": "{\"drawId\":\"550e8400-e29b-41d4-a716-446655440000\",\"numbers\":\"7,14,21,28,35\"}",
+  "registerTime": "2024-05-20T10:17:30",
+  "status": "PENDING",
+  "amount": 100.0
+}
+```
+
+##### Шаг 3: Оплата инвойса
+```
+POST /api/payments
+Content-Type: application/json
+Authorization: Bearer {token}
+
+{
+  "invoiceId": "883g0622-h50e-63f6-c928-779988773333",
+  "cardNumber": "4242424242424242",
+  "cvc": "123"
+}
+```
+
+Ответ (201 Created):
+```json
+{
+  "id": "994h1733-i61f-74g7-d039-880099884444",
+  "invoiceId": "883g0622-h50e-63f6-c928-779988773333",
+  "amount": 100.0,
+  "status": "SUCCESS",
+  "paymentTime": "2024-05-20T10:18:30"
+}
+```
+
+### Проверка билета
+
+```
+GET /api/tickets/661f9511-f38c-52e5-b817-557766551111/check-result
+Authorization: Bearer {token}
+```
+
+Ответ (200 OK):
+```json
+{
+  "ticketId": "661f9511-f38c-52e5-b817-557766551111",
+  "drawId": "550e8400-e29b-41d4-a716-446655440000",
+  "ticketNumbers": "5,12,18,24,36",
+  "winningNumbers": "5,11,18,24,35",
+  "matchedCount": 4,
+  "prizeAmount": 1000.0,
+  "status": "WON"
+}
+```
 
 ### Экспорт данных
 
-#### Экспорт результатов тиража в CSV
-- **Метод**: GET 
-- **URL**: `/api/draws/{drawId}/export/csv`
-- **Параметры пути**: 
-  - `drawId`: UUID идентификатор тиража
-- **Пример выполнения**:
-  ```bash
-  curl -X GET 'http://localhost:8088/api/draws/550e8400-e29b-41d4-a716-446655440000/export/csv' \
-    -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiJ9...' \
-    -o results.csv
-  ```
-- **Ответ**: Файл CSV с результатами тиража
-- **Описание**: Экспортирует результаты тиража в формате CSV.
-
-#### Экспорт результатов тиража в JSON
-- **Метод**: GET 
-- **URL**: `/api/draws/{drawId}/export/json`
-- **Параметры пути**: 
-  - `drawId`: UUID идентификатор тиража
-- **Пример выполнения**:
-  ```bash
-  curl -X GET 'http://localhost:8088/api/draws/550e8400-e29b-41d4-a716-446655440000/export/json' \
-    -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiJ9...' \
-    -o results.json
-  ```
-- **Ответ**: Файл JSON с результатами тиража
-- **Описание**: Экспортирует результаты тиража в формате JSON.
-
-#### Экспорт месячной статистики в CSV (только для ADMIN)
-- **Метод**: GET 
-- **URL**: `/api/statistics/{year}/{month}/csv`
-- **Параметры пути**: 
-  - `year`: Год (например, 2024)
-  - `month`: Месяц (1-12)
-- **Пример выполнения**:
-  ```bash
-  curl -X GET 'http://localhost:8088/api/statistics/2024/5/csv' \
-    -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiJ9...' \
-    -o statistics.csv
-  ```
-- **Ответ**: Файл CSV с месячной статистикой
-- **Описание**: Экспортирует месячную статистику в формате CSV. Доступно только администраторам.
-
-#### Экспорт месячной статистики в JSON (только для ADMIN)
-- **Метод**: GET 
-- **URL**: `/api/statistics/{year}/{month}/json`
-- **Параметры пути**: 
-  - `year`: Год (например, 2024)
-  - `month`: Месяц (1-12)
-- **Пример выполнения**:
-  ```bash
-  curl -X GET 'http://localhost:8088/api/statistics/2024/5/json' \
-    -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiJ9...' \
-    -o statistics.json
-  ```
-- **Ответ**: Файл JSON с месячной статистикой
-- **Описание**: Экспортирует месячную статистику в формате JSON. Доступно только администраторам.
-
-#### Экспорт истории пользователя в CSV
-- **Метод**: GET 
-- **URL**: `/api/users/{userId}/history/csv`
-- **Параметры пути**: 
-  - `userId`: UUID идентификатор пользователя
-- **Пример выполнения**:
-  ```bash
-  curl -X GET 'http://localhost:8088/api/users/550e8400-e29b-41d4-a716-446655440000/history/csv' \
-    -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiJ9...' \
-    -o user_history.csv
-  ```
-- **Ответ**: Файл CSV с историей пользователя
-- **Описание**: Экспортирует историю пользователя в формате CSV. Пользователи могут экспортировать только свою историю, администраторы - историю любого пользователя.
-
-#### Экспорт истории пользователя в JSON
-- **Метод**: GET 
-- **URL**: `/api/users/{userId}/history/json`
-- **Параметры пути**: 
-  - `userId`: UUID идентификатор пользователя
-- **Пример выполнения**:
-  ```bash
-  curl -X GET 'http://localhost:8088/api/users/550e8400-e29b-41d4-a716-446655440000/history/json' \
-    -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiJ9...' \
-    -o user_history.json
-  ```
-- **Ответ**: Файл JSON с историей пользователя
-- **Описание**: Экспортирует историю пользователя в формате JSON. Пользователи могут экспортировать только свою историю, администраторы - историю любого пользователя.
-
-### Платежи
-
-#### Создание нового счета
-- **Метод**: POST 
-- **URL**: `/api/invoice`
-- **Тело запроса**: 
-  ```json
-  {
-    "amount": 500.00,
-    "description": "Покупка билетов на тираж 5/36"
-  }
-  ```
-- **Пример выполнения**:
-  ```bash
-  curl -X POST 'http://localhost:8088/api/invoice' \
-    -H 'Content-Type: application/json' \
-    -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiJ9...' \
-    -d '{"amount":500.00,"description":"Покупка билетов на тираж 5/36"}'
-  ```
-- **Ответ**: Информация о созданном счете
-- **Описание**: Создает новый счет для оплаты.
-
-#### Получение счета по ID
-- **Метод**: GET 
-- **URL**: `/api/invoice/{id}`
-- **Параметры пути**: 
-  - `id`: UUID идентификатор счета
-- **Пример выполнения**:
-  ```bash
-  curl -X GET 'http://localhost:8088/api/invoice/550e8400-e29b-41d4-a716-446655440000' \
-    -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiJ9...'
-  ```
-- **Ответ**: Информация о счете
-- **Описание**: Возвращает информацию о счете по его ID.
-
-## Новые функции
-
-### Система уведомлений
-
-В проект добавлены уведомления через Email и Telegram:
-
-- Email-уведомления для победителей лотереи
-- Telegram-уведомления о результатах тиражей
-- Уведомления администраторов о критических ошибках
-
-### Возврат средств
-
-Пользователи могут запросить возврат средств за билеты, если тираж еще не начался:
-
 ```
-POST /api/tickets/{ticketId}/refund
+GET /api/users/772fa622-g49d-63f6-c928-668877662222/history/json
+Authorization: Bearer {token}
 ```
 
-### Реферальная система
+Ответ (200 OK) - файл JSON с историей билетов пользователя.
 
-Добавлена реферальная система с возможностью получения бонусов за приглашение новых пользователей:
+## Безопасность
 
-- Генерация реферальных кодов: `GET /api/users/me/referral-code`
-- Регистрация по реферальному коду: `POST /api/referrals/register?code={code}&userId={userId}`
-- Просмотр списка рефералов: `GET /api/users/me/referrals`
+- Все API эндпоинты, кроме аутентификации, требуют JWT токен
+- Токены действительны в течение 1 часа
+- Данные платежных карт не хранятся в системе
 
-## Запуск с Docker
+## Логирование
 
-Для запуска проекта с помощью Docker:
+- JSON-форматированные логи
+- Логи хранятся в директории `logs/`
+- Ежедневная ротация логов
 
-```
-docker-compose up -d
-```
+## Тестирование
 
-## API документация
-
-Swagger UI доступен по адресу: http://localhost:8088/swagger-ui.html
+В репозитории доступна коллекция Postman для тестирования API.
 
 ## Лицензия
 
-Этот проект распространяется под лицензией MIT - подробности см. в файле LICENSE.
+MIT

@@ -7,13 +7,15 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Repository
 public interface TicketRepository extends JpaRepository<Ticket, UUID> {
     List<Ticket> findByUser(User user);
-    List<Ticket> findByDraw(Draw draw);
-    List<Ticket> findByDrawAndStatus(Draw draw, Ticket.Status status);
     List<Ticket> findByUserAndDraw(User user, Draw draw);
-    List<Ticket> findByUserAndStatus(User user, Ticket.Status status);
+    List<Ticket> findByDraw(Draw draw);
+    List<Ticket> findByStatus(Ticket.Status status);
+    List<Ticket> findByDrawAndStatus(Draw draw, Ticket.Status status);
+    Optional<Ticket> findTopByUserAndDrawOrderByCreatedAtDesc(User user, Draw draw);
 } 
