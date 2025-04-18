@@ -1,0 +1,655 @@
+{
+	"info": {
+		"_postman_id": "e5c2a3b4-f1d2-43c5-a6b7-8c9d0e1f2g3h",
+		"name": "MEPHI Practicum Lottery API",
+		"description": "API для системы лотереи MEPHI Practicum",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Аутентификация",
+			"item": [
+				{
+					"name": "Регистрация",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"user@example.com\",\n    \"password\": \"password123\",\n    \"firstName\": \"Иван\",\n    \"lastName\": \"Иванов\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/register",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"register"
+							]
+						},
+						"description": "Регистрация нового пользователя"
+					},
+					"response": []
+				},
+				{
+					"name": "Вход",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = JSON.parse(responseBody);",
+									"pm.environment.set(\"token\", jsonData.token);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"user@example.com\",\n    \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						},
+						"description": "Вход в систему и получение JWT токена"
+					},
+					"response": []
+				}
+			],
+			"description": "Запросы для регистрации и авторизации пользователей"
+		},
+		{
+			"name": "Тиражи",
+			"item": [
+				{
+					"name": "Получить все тиражи",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/draws",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"draws"
+							]
+						},
+						"description": "Получение списка всех тиражей"
+					},
+					"response": []
+				},
+				{
+					"name": "Получить активные тиражи",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/draws/active",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"draws",
+								"active"
+							]
+						},
+						"description": "Получение списка активных тиражей"
+					},
+					"response": []
+				},
+				{
+					"name": "Получить тираж по ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/draws/{{drawId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"draws",
+								"{{drawId}}"
+							]
+						},
+						"description": "Получение информации о тираже по его ID"
+					},
+					"response": []
+				},
+				{
+					"name": "Создать новый тираж (ADMIN)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"lotteryType\": \"FIVE_OUT_OF_36\",\n    \"startTime\": \"2024-05-20T12:00:00\",\n    \"endTime\": \"2024-05-20T18:00:00\",\n    \"ticketPrice\": 150.00\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/admin/draws",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"draws"
+							]
+						},
+						"description": "Создание нового тиража (только для ADMIN)"
+					},
+					"response": []
+				},
+				{
+					"name": "Отменить тираж (ADMIN)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/admin/draws/{{drawId}}/cancel",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"draws",
+								"{{drawId}}",
+								"cancel"
+							]
+						},
+						"description": "Отмена тиража (только для ADMIN)"
+					},
+					"response": []
+				},
+				{
+					"name": "Генерировать результат тиража (ADMIN)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/admin/draws/{{drawId}}/generate-result",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"draws",
+								"{{drawId}}",
+								"generate-result"
+							]
+						},
+						"description": "Генерация результатов тиража (только для ADMIN)"
+					},
+					"response": []
+				},
+				{
+					"name": "Получить результаты тиража",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/draws/{{drawId}}/results",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"draws",
+								"{{drawId}}",
+								"results"
+							]
+						},
+						"description": "Получение результатов тиража"
+					},
+					"response": []
+				}
+			],
+			"description": "Запросы для работы с тиражами"
+		},
+		{
+			"name": "Билеты",
+			"item": [
+				{
+					"name": "Купить билет (одним запросом)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"drawId\": \"{{drawId}}\",\n    \"selectedNumbers\": [5, 12, 18, 24, 36],\n    \"paymentDetails\": {\n        \"cardNumber\": \"4242424242424242\",\n        \"expiryDate\": \"12/24\",\n        \"cvv\": \"123\",\n        \"cardholderName\": \"IVAN IVANOV\"\n    }\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/tickets/purchase",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"tickets",
+								"purchase"
+							]
+						},
+						"description": "Покупка билета в один шаг (выбор тиража, чисел и оплата)"
+					},
+					"response": []
+				},
+				{
+					"name": "Создать билет (двухшаговый процесс)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"drawId\": \"{{drawId}}\",\n    \"selectedNumbers\": [5, 12, 18, 24, 36]\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/tickets",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"tickets"
+							]
+						},
+						"description": "Создание билета (первый шаг в двухшаговом процессе)"
+					},
+					"response": []
+				},
+				{
+					"name": "Создать инвойс",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"ticketId\": \"{{ticketId}}\",\n    \"amount\": 150.00,\n    \"description\": \"Оплата билета на тираж 5/36\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/invoice",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"invoice"
+							]
+						},
+						"description": "Создание инвойса для оплаты билета"
+					},
+					"response": []
+				},
+				{
+					"name": "Оплатить инвойс",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"invoiceId\": \"{{invoiceId}}\",\n    \"cardNumber\": \"4242424242424242\",\n    \"expiryDate\": \"12/24\",\n    \"cvv\": \"123\",\n    \"cardholderName\": \"IVAN IVANOV\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/payments",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"payments"
+							]
+						},
+						"description": "Оплата инвойса (второй шаг в двухшаговом процессе)"
+					},
+					"response": []
+				},
+				{
+					"name": "Получить билеты пользователя",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/tickets",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"tickets"
+							]
+						},
+						"description": "Получение списка билетов пользователя"
+					},
+					"response": []
+				},
+				{
+					"name": "Получить билет по ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/tickets/{{ticketId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"tickets",
+								"{{ticketId}}"
+							]
+						},
+						"description": "Получение информации о билете по его ID"
+					},
+					"response": []
+				},
+				{
+					"name": "Проверить результат билета",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/tickets/{{ticketId}}/check-result",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"tickets",
+								"{{ticketId}}",
+								"check-result"
+							]
+						},
+						"description": "Проверка результата билета"
+					},
+					"response": []
+				}
+			],
+			"description": "Запросы для работы с билетами и оплатой"
+		},
+		{
+			"name": "Экспорт данных",
+			"item": [
+				{
+					"name": "Экспорт результатов тиража в CSV",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/draws/{{drawId}}/export/csv",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"draws",
+								"{{drawId}}",
+								"export",
+								"csv"
+							]
+						},
+						"description": "Экспорт результатов тиража в формате CSV"
+					},
+					"response": []
+				},
+				{
+					"name": "Экспорт результатов тиража в JSON",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/draws/{{drawId}}/export/json",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"draws",
+								"{{drawId}}",
+								"export",
+								"json"
+							]
+						},
+						"description": "Экспорт результатов тиража в формате JSON"
+					},
+					"response": []
+				},
+				{
+					"name": "Экспорт истории пользователя в CSV",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/users/{{userId}}/history/csv",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"{{userId}}",
+								"history",
+								"csv"
+							]
+						},
+						"description": "Экспорт истории пользователя в формате CSV"
+					},
+					"response": []
+				},
+				{
+					"name": "Экспорт истории пользователя в JSON",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/users/{{userId}}/history/json",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"{{userId}}",
+								"history",
+								"json"
+							]
+						},
+						"description": "Экспорт истории пользователя в формате JSON"
+					},
+					"response": []
+				}
+			],
+			"description": "Запросы для экспорта данных в различных форматах"
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:8088",
+			"type": "string"
+		},
+		{
+			"key": "token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "drawId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "ticketId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "invoiceId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "userId",
+			"value": "",
+			"type": "string"
+		}
+	]
+} 

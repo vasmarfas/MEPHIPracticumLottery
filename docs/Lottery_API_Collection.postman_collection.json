@@ -1,0 +1,553 @@
+{
+  "info": {
+    "_postman_id": "12345678-1234-1234-1234-123456789012",
+    "name": "Lottery API Collection",
+    "description": "Коллекция API для тестирования системы лотереи",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Register User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"username\": \"testuser\",\n    \"password\": \"password123\",\n    \"email\": \"test@example.com\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/register",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "register"]
+            },
+            "description": "Регистрация нового пользователя"
+          }
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"username\": \"testuser\",\n    \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "login"]
+            },
+            "description": "Вход пользователя и получение JWT токена"
+          }
+        }
+      ],
+      "description": "Операции аутентификации"
+    },
+    {
+      "name": "Draws",
+      "item": [
+        {
+          "name": "Create Draw (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"lotteryType\": \"FIVE_OUT_OF_36\",\n    \"startTime\": \"2023-12-31T18:00:00\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/admin/draws",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "draws"]
+            },
+            "description": "Создание нового тиража (только admin)"
+          }
+        },
+        {
+          "name": "Get Active Draws",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/draws/active",
+              "host": ["{{base_url}}"],
+              "path": ["api", "draws", "active"]
+            },
+            "description": "Получение списка активных тиражей"
+          }
+        },
+        {
+          "name": "Get All Draws",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/draws",
+              "host": ["{{base_url}}"],
+              "path": ["api", "draws"]
+            },
+            "description": "Получение списка всех тиражей"
+          }
+        },
+        {
+          "name": "Get Draw By ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/draws/{{draw_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "draws", "{{draw_id}}"]
+            },
+            "description": "Получение тиража по ID"
+          }
+        },
+        {
+          "name": "Cancel Draw (Admin)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/draws/{{draw_id}}/cancel",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "draws", "{{draw_id}}", "cancel"]
+            },
+            "description": "Отмена тиража (только admin)"
+          }
+        }
+      ],
+      "description": "Операции с тиражами"
+    },
+    {
+      "name": "Tickets",
+      "item": [
+        {
+          "name": "Create Ticket",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"drawId\": \"{{draw_id}}\",\n    \"numbers\": \"1,2,3,4,5\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/tickets",
+              "host": ["{{base_url}}"],
+              "path": ["api", "tickets"]
+            },
+            "description": "Создание билета"
+          }
+        },
+        {
+          "name": "Get Ticket By ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/tickets/{{ticket_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "tickets", "{{ticket_id}}"]
+            },
+            "description": "Получение билета по ID"
+          }
+        },
+        {
+          "name": "Get User Tickets",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/tickets",
+              "host": ["{{base_url}}"],
+              "path": ["api", "tickets"]
+            },
+            "description": "Получение списка всех билетов пользователя"
+          }
+        },
+        {
+          "name": "Refund Ticket",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/tickets/{{ticket_id}}/refund",
+              "host": ["{{base_url}}"],
+              "path": ["api", "tickets", "{{ticket_id}}", "refund"]
+            },
+            "description": "Запрос на возврат средств за билет"
+          }
+        }
+      ],
+      "description": "Операции с билетами"
+    },
+    {
+      "name": "Results",
+      "item": [
+        {
+          "name": "Get Draw Result",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/draws/{{draw_id}}/results",
+              "host": ["{{base_url}}"],
+              "path": ["api", "draws", "{{draw_id}}", "results"]
+            },
+            "description": "Получение результатов тиража"
+          }
+        },
+        {
+          "name": "Generate Draw Result (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/draws/{{draw_id}}/generate-result",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "draws", "{{draw_id}}", "generate-result"]
+            },
+            "description": "Генерация результатов тиража (только admin)"
+          }
+        },
+        {
+          "name": "Check Ticket Result",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/tickets/{{ticket_id}}/check-result",
+              "host": ["{{base_url}}"],
+              "path": ["api", "tickets", "{{ticket_id}}", "check-result"]
+            },
+            "description": "Проверка результата билета"
+          }
+        }
+      ],
+      "description": "Операции с результатами тиражей"
+    },
+    {
+      "name": "Payments",
+      "item": [
+        {
+          "name": "Create Invoice",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"ticketData\": \"Ticket for draw {{draw_id}}\",\n    \"amount\": 100.0\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/invoice",
+              "host": ["{{base_url}}"],
+              "path": ["api", "invoice"]
+            },
+            "description": "Создание счета для оплаты"
+          }
+        },
+        {
+          "name": "Make Payment",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"invoiceId\": \"{{invoice_id}}\",\n    \"cardNumber\": \"4111111111111111\",\n    \"cvc\": \"123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/payments",
+              "host": ["{{base_url}}"],
+              "path": ["api", "payments"]
+            },
+            "description": "Выполнение платежа"
+          }
+        }
+      ],
+      "description": "Операции с платежами"
+    },
+    {
+      "name": "Export",
+      "item": [
+        {
+          "name": "Export Draw Results CSV",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/draws/{{draw_id}}/export/csv",
+              "host": ["{{base_url}}"],
+              "path": ["api", "draws", "{{draw_id}}", "export", "csv"]
+            },
+            "description": "Экспорт результатов тиража в CSV"
+          }
+        },
+        {
+          "name": "Export Draw Results JSON",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/draws/{{draw_id}}/export/json",
+              "host": ["{{base_url}}"],
+              "path": ["api", "draws", "{{draw_id}}", "export", "json"]
+            },
+            "description": "Экспорт результатов тиража в JSON"
+          }
+        },
+        {
+          "name": "Export Monthly Statistics CSV",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/statistics/2023/12/csv",
+              "host": ["{{base_url}}"],
+              "path": ["api", "statistics", "2023", "12", "csv"]
+            },
+            "description": "Экспорт ежемесячной статистики в CSV"
+          }
+        },
+        {
+          "name": "Export User History CSV",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/users/me/history/csv",
+              "host": ["{{base_url}}"],
+              "path": ["api", "users", "me", "history", "csv"]
+            },
+            "description": "Экспорт истории текущего пользователя в CSV"
+          }
+        }
+      ],
+      "description": "Операции экспорта данных"
+    },
+    {
+      "name": "Referrals",
+      "item": [
+        {
+          "name": "Get Referral Code",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/users/me/referral-code",
+              "host": ["{{base_url}}"],
+              "path": ["api", "users", "me", "referral-code"]
+            },
+            "description": "Получение реферального кода пользователя"
+          }
+        },
+        {
+          "name": "Register Referral",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/referrals/register?code={{referral_code}}&userId={{user_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "referrals", "register"],
+              "query": [
+                {
+                  "key": "code",
+                  "value": "{{referral_code}}"
+                },
+                {
+                  "key": "userId",
+                  "value": "{{user_id}}"
+                }
+              ]
+            },
+            "description": "Регистрация по реферальному коду"
+          }
+        },
+        {
+          "name": "Get User Referrals",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/users/me/referrals",
+              "host": ["{{base_url}}"],
+              "path": ["api", "users", "me", "referrals"]
+            },
+            "description": "Получение списка рефералов пользователя"
+          }
+        }
+      ],
+      "description": "Операции с реферальной системой"
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8088",
+      "type": "string"
+    },
+    {
+      "key": "jwt_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "draw_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "ticket_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "invoice_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "user_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "referral_code",
+      "value": "",
+      "type": "string"
+    }
+  ]
+} 
