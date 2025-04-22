@@ -5,6 +5,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.mephi_kotlin_band.lottery.features.user.model.CustomUserDetails;
 import org.mephi_kotlin_band.lottery.features.user.model.User;
 import org.mephi_kotlin_band.lottery.features.user.repository.UserRepository;
 import org.mephi_kotlin_band.lottery.features.user.service.JwtService;
@@ -22,8 +23,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
-@Component
 @RequiredArgsConstructor
+@Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
@@ -53,10 +54,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             if (userOpt.isPresent() && jwtService.isTokenValid(token, username)) {
                 User user = userOpt.get();
 
+                CustomUserDetails userDetails = new CustomUserDetails(user);
+                
                 String role = jwtService.extractClaims(token).get("role", String.class);
                 List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_%s".formatted(role)));
 
-                var authToken = new UsernamePasswordAuthenticationToken(user, null, authorities);
+                var authToken = new UsernamePasswordAuthenticationToken(userDetails, null, authorities);
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authToken);
             }
