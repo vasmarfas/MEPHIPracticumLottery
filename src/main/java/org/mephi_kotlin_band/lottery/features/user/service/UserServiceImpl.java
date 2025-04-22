@@ -19,14 +19,14 @@ public class UserServiceImpl implements UserService {
     @Transactional(readOnly = true)
     public User getUserById(UUID id) {
         return userRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("User not found with id: " + id));
+                .orElseThrow(() -> new IllegalArgumentException("User not found with id: %s".formatted(id)));
     }
 
     @Override
     @Transactional(readOnly = true)
     public User getUserByUsername(String username) {
         return userRepository.findByUsername(username)
-                .orElseThrow(() -> new IllegalArgumentException("User not found with username: " + username));
+                .orElseThrow(() -> new IllegalArgumentException("User not found with username: %s".formatted(username)));
     }
 
     @Override
