@@ -58,9 +58,11 @@ public class TicketController {
     @PreAuthorize("hasRole('ADMIN') or @userSecurity.isCurrentUser(#userId)")
     public ResponseEntity<String> exportUserHistoryCsv(@PathVariable UUID userId) {
         String csv = exportService.exportUserHistoryAsCsv(userId);
+        String headers = "attachment; filename=\"user-%s-history.csv\"".formatted(userId.toString());
+
         return ResponseEntity.ok()
                 .contentType(MediaType.TEXT_PLAIN)
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"user-" + userId + "-history.csv\"")
+                .header(HttpHeaders.CONTENT_DISPOSITION, headers)
                 .body(csv);
     }
 
@@ -68,9 +70,11 @@ public class TicketController {
     @PreAuthorize("hasRole('ADMIN') or @userSecurity.isCurrentUser(#userId)")
     public ResponseEntity<String> exportUserHistoryJson(@PathVariable UUID userId) {
         String json = exportService.exportUserHistoryAsJson(userId);
+        String headers = "attachment; filename=\"user-%s-history.json\"".formatted(userId.toString());
+
         return ResponseEntity.ok()
                 .contentType(MediaType.APPLICATION_JSON)
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"user-" + userId + "-history.json\"")
+                .header(HttpHeaders.CONTENT_DISPOSITION, headers)
                 .body(json);
     }
 
