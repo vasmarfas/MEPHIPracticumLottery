@@ -40,18 +40,23 @@ public class DrawResultController {
     @GetMapping("/draws/{drawId}/export/csv")
     public ResponseEntity<String> exportDrawResultsCsv(@PathVariable UUID drawId) {
         String csv = exportService.exportDrawResultsAsCsv(drawId);
+        String headerValue = String.format("attachment; filename=\"draw-%s-results.csv\"", drawId);
+
         return ResponseEntity.ok()
                 .contentType(MediaType.TEXT_PLAIN)
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"draw-" + drawId + "-results.csv\"")
+                .header(HttpHeaders.CONTENT_DISPOSITION, headerValue)
                 .body(csv);
     }
 
     @GetMapping("/draws/{drawId}/export/json")
     public ResponseEntity<String> exportDrawResultsJson(@PathVariable UUID drawId) {
         String json = exportService.exportDrawResultsAsJson(drawId);
+        String headerValue = String.format("attachment; filename=\"draw-%s-results.json\"", drawId);
+
+
         return ResponseEntity.ok()
                 .contentType(MediaType.APPLICATION_JSON)
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"draw-" + drawId + "-results.json\"")
+                .header(HttpHeaders.CONTENT_DISPOSITION, headerValue)
                 .body(json);
     }
 
@@ -59,9 +64,11 @@ public class DrawResultController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<String> exportMonthlyStatisticsCsv(@PathVariable int year, @PathVariable int month) {
         String csv = exportService.exportMonthlyStatisticsAsCsv(year, month);
+        String headerValues = String.format("attachment; filename=\"statistics-%d-%02d.csv\"", year, month);
+
         return ResponseEntity.ok()
                 .contentType(MediaType.TEXT_PLAIN)
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"statistics-" + year + "-" + month + ".csv\"")
+                .header(HttpHeaders.CONTENT_DISPOSITION, headerValues)
                 .body(csv);
     }
 
@@ -69,9 +76,11 @@ public class DrawResultController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<String> exportMonthlyStatisticsJson(@PathVariable int year, @PathVariable int month) {
         String json = exportService.exportMonthlyStatisticsAsJson(year, month);
+        String headerValues = String.format("attachment; filename=\"statistics-%d-%02d.json\"", year, month);
+
         return ResponseEntity.ok()
                 .contentType(MediaType.APPLICATION_JSON)
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"statistics-" + year + "-" + month + ".json\"")
+                .header(HttpHeaders.CONTENT_DISPOSITION, headerValues)
                 .body(json);
     }
-} 
+}

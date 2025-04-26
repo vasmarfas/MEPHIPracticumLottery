@@ -29,4 +29,4 @@ public class DrawResult {
 
     @Column(nullable = false)
     private LocalDateTime resultTime;
-} 
+}

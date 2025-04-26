@@ -13,4 +13,4 @@ public interface DrawRepository extends JpaRepository<Draw, UUID> {
     List<Draw> findByStatus(Draw.Status status);
     List<Draw> findByStartTimeBefore(LocalDateTime time);
     List<Draw> findByStartTimeBeforeAndStatus(LocalDateTime time, Draw.Status status);
-} 
+}

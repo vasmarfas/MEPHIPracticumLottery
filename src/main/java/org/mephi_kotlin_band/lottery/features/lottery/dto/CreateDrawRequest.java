@@ -25,4 +25,4 @@ public class CreateDrawRequest {
     public Draw.LotteryType getLotteryTypeEnum() {
         return Draw.LotteryType.valueOf(lotteryType);
     }
-} 
+}

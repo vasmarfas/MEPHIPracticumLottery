@@ -3,6 +3,7 @@ package org.mephi_kotlin_band.lottery.features.user.controller;
 import lombok.RequiredArgsConstructor;
 import org.mephi_kotlin_band.lottery.features.user.dto.ReferralCodeResponse;
 import org.mephi_kotlin_band.lottery.features.user.dto.ReferralDto;
+import org.mephi_kotlin_band.lottery.features.user.mapper.ReferralMapper;
 import org.mephi_kotlin_band.lottery.features.user.model.CustomUserDetails;
 import org.mephi_kotlin_band.lottery.features.user.model.Referral;
 import org.mephi_kotlin_band.lottery.features.user.model.User;
@@ -51,7 +52,7 @@ public class ReferralController {
         User referrer = referralService.findUserByReferralCode(referralCode);
         Referral referral = referralService.createReferral(referrer.getId(), userId);
         
-        return ResponseEntity.ok(mapToDto(referral));
+        return ResponseEntity.ok(ReferralMapper.toDto(referral));
     }
 
     /**
@@ -66,27 +67,9 @@ public class ReferralController {
         List<Referral> referrals = referralService.getUserReferrals(user.getId());
         
         List<ReferralDto> dtos = referrals.stream()
-                .map(this::mapToDto)
+                .map(ReferralMapper::toDto)
                 .collect(Collectors.toList());
         
         return ResponseEntity.ok(dtos);
-    }
-
-    /**
-     * Преобразует Referral в ReferralDto
-     * @param referral сущность
-     * @return DTO
-     */
-    private ReferralDto mapToDto(Referral referral) {
-        return ReferralDto.builder()
-                .id(referral.getId())
-                .referrerId(referral.getReferrer().getId())
-                .referrerUsername(referral.getReferrer().getUsername())
-                .referredId(referral.getReferred().getId())
-                .referredUsername(referral.getReferred().getUsername())
-                .createdAt(referral.getCreatedAt())
-                .bonusRewarded(referral.isBonusRewarded())
-                .bonusAmount(referral.getBonusAmount())
-                .build();
     }
 } 

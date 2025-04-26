@@ -24,21 +24,20 @@ public class DrawDto {
         if (draw == null) {
             return null;
         }
-        
+
         DrawDto.DrawDtoBuilder builder = DrawDto.builder()
                 .id(draw.getId())
                 .startTime(draw.getStartTime())
                 .createdAt(draw.getCreatedAt());
-        
-        // Безопасно получаем имя enum
+
         if (draw.getLotteryType() != null) {
             builder.lotteryType(draw.getLotteryType().name());
         }
-        
+
         if (draw.getStatus() != null) {
             builder.status(draw.getStatus().name());
         }
-        
+
         return builder.build();
     }
-} 
+}

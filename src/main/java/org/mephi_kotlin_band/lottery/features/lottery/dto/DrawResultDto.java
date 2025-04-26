@@ -27,4 +27,4 @@ public class DrawResultDto {
                 .resultTime(drawResult.getResultTime())
                 .build();
     }
-} 
+}

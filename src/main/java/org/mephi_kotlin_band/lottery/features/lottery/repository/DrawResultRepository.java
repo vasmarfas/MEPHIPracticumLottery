@@ -12,4 +12,4 @@ import java.util.UUID;
 public interface DrawResultRepository extends JpaRepository<DrawResult, UUID> {
     Optional<DrawResult> findByDraw(Draw draw);
     Optional<DrawResult> findByDrawId(UUID drawId);
-} 
+}
