@@ -44,8 +44,11 @@ WORKDIR /app
 # Копирование jar файла в отдельную директорию
 COPY --from=build /app/build/libs /app/libs
 
+# Проверяем содержимое директории libs
+RUN ls /app/libs
+
 # Перемещение jar файла в корень рабочей директории
-RUN mv /app/libs/*.jar /app/app.jar
+RUN mkdir -p /app && mv /app/libs/lottery-0.0.1-SNAPSHOT.jar /app/app.jar
 
 EXPOSE 8088
 
