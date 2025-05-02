@@ -38,8 +38,11 @@ FROM eclipse-temurin:17-jre-alpine
 
 WORKDIR /app
 
-# Копируем JAR-файл из первого этапа
-COPY --from=build /app/build/libs/*.jar /app/app.jar
+# Копирование jar файла в отдельную директорию
+COPY --from=build /app/build/libs /app/libs
+
+# Перемещение jar файла в корень рабочей директории
+RUN mv /app/libs/*.jar /app/app.jar
 
 EXPOSE 8088
 
