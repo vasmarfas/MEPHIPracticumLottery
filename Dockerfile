@@ -33,6 +33,9 @@ COPY src ./src
 # Собираем приложение
 RUN gradle build --no-daemon -x test
 
+# Проверяем содержимое директории с JAR-файлом
+RUN ls /app/build/libs
+
 # Второй этап - создание образа для запуска
 FROM eclipse-temurin:17-jre-alpine
 
@@ -42,8 +45,8 @@ WORKDIR /app
 COPY --from=build /app/build/libs /app/libs
 
 # Перемещение jar файла в корень рабочей директории
-RUN mv /app/libs/*.jar /app.jar
+RUN mv /app/libs/*.jar /app/app.jar
 
 EXPOSE 8088
 
-ENTRYPOINT ["java", "-jar", "app.jar"] 
+ENTRYPOINT ["java", "-jar", "app.jar"]
