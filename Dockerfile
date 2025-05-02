@@ -42,7 +42,7 @@ WORKDIR /app
 COPY --from=build /app/build/libs /app/libs
 
 # Перемещение jar файла в корень рабочей директории
-RUN mv /app/libs/*.jar /app/app.jar
+RUN mv /app/libs/*.jar /app.jar
 
 EXPOSE 8088
 
