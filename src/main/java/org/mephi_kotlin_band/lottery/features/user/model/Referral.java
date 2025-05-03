@@ -21,11 +21,11 @@ public class Referral {
     private UUID id;
 
     @ManyToOne
-    @JoinColumn(name = "referrer_id", nullable = false)
+    @JoinColumn(name = "user_id", nullable = false)
     private User referrer;
 
     @ManyToOne
-    @JoinColumn(name = "referred_id", nullable = false)
+    @JoinColumn(name = "referred_user_id", nullable = false)
     private User referred;
 
     @Column(name = "created_at", nullable = false)
