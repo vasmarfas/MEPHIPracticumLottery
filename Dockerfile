@@ -34,7 +34,7 @@ COPY src ./src
 RUN gradle build --no-daemon -x test
 
 # Второй этап - создание образа для запуска
-FROM eclipse-temurin:17-jre-alpine
+FROM eclipse-temurin:17-jre
 
 WORKDIR /app
 
