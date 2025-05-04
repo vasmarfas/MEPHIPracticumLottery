@@ -25,25 +25,24 @@ public class TicketDto {
         if (ticket == null) {
             return null;
         }
-
+        
         TicketDto.TicketDtoBuilder builder = TicketDto.builder()
                 .id(ticket.getId())
                 .numbers(ticket.getNumbers())
                 .createdAt(ticket.getCreatedAt());
-
+        
         if (ticket.getUser() != null) {
             builder.userId(ticket.getUser().getId());
         }
-
+        
         if (ticket.getDraw() != null) {
             builder.drawId(ticket.getDraw().getId());
         }
-
+        
         if (ticket.getStatus() != null) {
             builder.status(ticket.getStatus().name());
         }
-
+        
         return builder.build();
     }
-}
-
+} 

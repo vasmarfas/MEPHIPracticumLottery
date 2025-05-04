@@ -14,5 +14,4 @@ public interface TicketService {
     List<TicketDto> getUserTickets(User user);
     List<TicketDto> getUserTicketsForDraw(UUID drawId, User user);
     boolean validateTicketNumbers(String numbers, Draw.LotteryType lotteryType);
-}
-
+} 

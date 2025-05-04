@@ -76,6 +76,7 @@ public class DrawServiceImpl implements DrawService {
         draw.setStatus(Draw.Status.CANCELLED);
         Draw savedDraw = drawRepository.save(draw);
 
+        // Invalidate all tickets for this draw
         List<Ticket> tickets = ticketRepository.findByDraw(draw);
         tickets.forEach(ticket -> ticket.setStatus(Ticket.Status.INVALID));
         ticketRepository.saveAll(tickets);
@@ -86,10 +87,11 @@ public class DrawServiceImpl implements DrawService {
 
     @Override
     @Transactional
-    @Scheduled(fixedRate = 60000)
+    @Scheduled(fixedRate = 60000) // Run every minute
     public void updateDrawStatuses() {
         LocalDateTime now = LocalDateTime.now();
 
+        // Update PLANNED to ACTIVE
         List<Draw> plannedDraws = drawRepository.findByStartTimeBeforeAndStatus(now, Draw.Status.PLANNED);
         plannedDraws.forEach(draw -> {
             draw.setStatus(Draw.Status.ACTIVE);
@@ -97,13 +99,14 @@ public class DrawServiceImpl implements DrawService {
         });
         drawRepository.saveAll(plannedDraws);
 
+        // Schedule completed draws to be processed by ResultService
         List<Draw> activeDraws = drawRepository.findByStatus(Draw.Status.ACTIVE);
         activeDraws.forEach(draw -> {
-            if (draw.getStartTime().plusHours(1).isBefore(now)) {
+            if (draw.getStartTime().plusHours(1).isBefore(now)) { // Assuming a draw lasts for 1 hour
                 draw.setStatus(Draw.Status.COMPLETED);
                 log.info("Updated draw status from ACTIVE to COMPLETED: {}", draw);
             }
         });
         drawRepository.saveAll(activeDraws);
     }
-}
+} 

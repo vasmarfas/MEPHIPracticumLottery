@@ -1,28 +1,68 @@
 {
   "openapi": "3.0.1",
   "info": {
-    "title": "OTP Service API",
-    "description": "Документация для сервиса генерации и валидации OTP-кодов",
-    "version": "1.0"
+    "title": "Lottery Service API",
+    "description": "API для сервиса лотереи MEPHI Kotlin Band",
+    "version": "1.0.0"
   },
   "servers": [
     {
       "url": "http://localhost:8080",
-      "description": "Generated server url"
+      "description": "Local development server"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Authentication",
+      "description": "Регистрация и аутентификация пользователей"
+    },
+    {
+      "name": "Referrals",
+      "description": "Управление реферальной системой"
+    },
+    {
+      "name": "Tickets",
+      "description": "Управление лотерейными билетами"
+    },
+    {
+      "name": "Draws",
+      "description": "Управление тиражами лотереи"
+    },
+    {
+      "name": "Payments",
+      "description": "Управление платежами"
+    },
+    {
+      "name": "Invoices",
+      "description": "Управление счетами"
+    },
+    {
+      "name": "Refunds",
+      "description": "Управление возвратами"
     }
   ],
   "paths": {
     "/api/auth/register": {
       "post": {
         "tags": [
-          "auth-controller"
+          "Authentication"
         ],
+        "summary": "Регистрация нового пользователя",
+        "description": "Создает нового пользователя с указанными учетными данными",
         "operationId": "register",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/RegisterRequest"
+              },
+              "examples": {
+                "userExample": {
+                  "value": {
+                    "username": "user@example.com",
+                    "password": "password123"
+                  }
+                }
               }
             }
           },
@@ -30,14 +70,26 @@
         },
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "Пользователь успешно зарегистрирован",
             "content": {
-              "*/*": {
+              "application/json": {
                 "schema": {
-                  "type": "object"
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "User registered successfully"
+                    }
+                  }
                 }
               }
             }
+          },
+          "400": {
+            "description": "Неверные данные запроса"
+          },
+          "409": {
+            "description": "Пользователь с таким именем уже существует"
           }
         }
       }
@@ -45,14 +97,24 @@
     "/api/auth/login": {
       "post": {
         "tags": [
-          "auth-controller"
+          "Authentication"
         ],
+        "summary": "Аутентификация пользователя",
+        "description": "Выполняет вход пользователя с указанными учетными данными и возвращает JWT-токен",
         "operationId": "login",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/LoginRequest"
+              },
+              "examples": {
+                "userExample": {
+                  "value": {
+                    "username": "user@example.com",
+                    "password": "password123"
+                  }
+                }
               }
             }
           },
@@ -60,14 +122,640 @@
         },
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "Успешная аутентификация",
             "content": {
-              "*/*": {
+              "application/json": {
                 "schema": {
-                  "type": "object"
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Login successful"
+                    },
+                    "token": {
+                      "type": "string",
+                      "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                    }
+                  }
                 }
               }
             }
+          },
+          "401": {
+            "description": "Неверное имя пользователя или пароль"
+          }
+        }
+      }
+    },
+    "/api/users/me/referral-code": {
+      "get": {
+        "tags": [
+          "Referrals"
+        ],
+        "summary": "Получение реферального кода",
+        "description": "Генерирует и возвращает реферальный код для текущего пользователя",
+        "operationId": "getUserReferralCode",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Реферальный код успешно получен",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReferralCodeResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Неавторизованный доступ"
+          }
+        }
+      }
+    },
+    "/api/referrals/register": {
+      "post": {
+        "tags": [
+          "Referrals"
+        ],
+        "summary": "Регистрация реферала",
+        "description": "Регистрирует нового пользователя по реферальному коду",
+        "operationId": "registerReferral",
+        "parameters": [
+          {
+            "name": "code",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Реферальный код"
+          },
+          {
+            "name": "userId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "ID регистрируемого пользователя"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Реферал успешно зарегистрирован",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReferralDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Неверные данные запроса"
+          },
+          "404": {
+            "description": "Реферальный код не найден"
+          }
+        }
+      }
+    },
+    "/api/users/me/referrals": {
+      "get": {
+        "tags": [
+          "Referrals"
+        ],
+        "summary": "Получение списка рефералов",
+        "description": "Возвращает список рефералов текущего пользователя",
+        "operationId": "getCurrentUserReferrals",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Список рефералов успешно получен",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ReferralDto"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Неавторизованный доступ"
+          }
+        }
+      }
+    },
+    "/api/tickets": {
+      "post": {
+        "tags": [
+          "Tickets"
+        ],
+        "summary": "Создание билета",
+        "description": "Создает билет без оплаты (устаревший метод)",
+        "operationId": "createTicket",
+        "deprecated": true,
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateTicketRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Билет успешно создан",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TicketDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Неверные данные запроса"
+          },
+          "401": {
+            "description": "Неавторизованный доступ"
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Tickets"
+        ],
+        "summary": "Получение всех билетов пользователя",
+        "description": "Возвращает список всех билетов текущего пользователя",
+        "operationId": "getUserTickets",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Список билетов успешно получен",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TicketDto"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Неавторизованный доступ"
+          }
+        }
+      }
+    },
+    "/api/tickets/{id}": {
+      "get": {
+        "tags": [
+          "Tickets"
+        ],
+        "summary": "Получение билета по ID",
+        "description": "Возвращает информацию о билете по его ID",
+        "operationId": "getTicketById",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "ID билета"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Билет успешно получен",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TicketDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Неавторизованный доступ"
+          },
+          "404": {
+            "description": "Билет не найден"
+          }
+        }
+      }
+    },
+    "/api/draws/{drawId}/tickets": {
+      "get": {
+        "tags": [
+          "Tickets"
+        ],
+        "summary": "Получение билетов пользователя для тиража",
+        "description": "Возвращает список билетов текущего пользователя для указанного тиража",
+        "operationId": "getUserTicketsForDraw",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "drawId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "ID тиража"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Список билетов успешно получен",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TicketDto"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Неавторизованный доступ"
+          },
+          "404": {
+            "description": "Тираж не найден"
+          }
+        }
+      }
+    },
+    "/api/users/{userId}/history/csv": {
+      "get": {
+        "tags": [
+          "Tickets"
+        ],
+        "summary": "Экспорт истории пользователя в CSV",
+        "description": "Экспортирует историю покупок пользователя в формате CSV",
+        "operationId": "exportUserHistoryCsv",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "ID пользователя"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "История успешно экспортирована",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Неавторизованный доступ"
+          },
+          "403": {
+            "description": "Доступ запрещен"
+          },
+          "404": {
+            "description": "Пользователь не найден"
+          }
+        }
+      }
+    },
+    "/api/users/{userId}/history/json": {
+      "get": {
+        "tags": [
+          "Tickets"
+        ],
+        "summary": "Экспорт истории пользователя в JSON",
+        "description": "Экспортирует историю покупок пользователя в формате JSON",
+        "operationId": "exportUserHistoryJson",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "ID пользователя"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "История успешно экспортирована",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Неавторизованный доступ"
+          },
+          "403": {
+            "description": "Доступ запрещен"
+          },
+          "404": {
+            "description": "Пользователь не найден"
+          }
+        }
+      }
+    },
+    "/api/users/me/history": {
+      "get": {
+        "tags": [
+          "Tickets"
+        ],
+        "summary": "История текущего пользователя",
+        "description": "Возвращает историю покупок текущего пользователя",
+        "operationId": "getCurrentUserHistory",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "История успешно получена",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TicketDto"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Неавторизованный доступ"
+          }
+        }
+      }
+    },
+    "/api/payments": {
+      "post": {
+        "tags": [
+          "Payments"
+        ],
+        "summary": "Обработка платежа",
+        "description": "Обрабатывает платеж по указанным платежным данным",
+        "operationId": "processPayment",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePaymentRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Платеж успешно обработан",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Неверные данные запроса"
+          },
+          "401": {
+            "description": "Неавторизованный доступ"
+          },
+          "404": {
+            "description": "Счет не найден"
+          }
+        }
+      }
+    },
+    "/api/payments/{id}": {
+      "get": {
+        "tags": [
+          "Payments"
+        ],
+        "summary": "Получение платежа по ID",
+        "description": "Возвращает информацию о платеже по его ID",
+        "operationId": "getPaymentById",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "ID платежа"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Платеж успешно получен",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Неавторизованный доступ"
+          },
+          "404": {
+            "description": "Платеж не найден"
+          }
+        }
+      }
+    },
+    "/api/payments/invoice/{invoiceId}": {
+      "get": {
+        "tags": [
+          "Payments"
+        ],
+        "summary": "Получение платежа по ID счета",
+        "description": "Возвращает информацию о платеже по ID счета",
+        "operationId": "getPaymentByInvoiceId",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "invoiceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "ID счета"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Платеж успешно получен",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Неавторизованный доступ"
+          },
+          "404": {
+            "description": "Платеж не найден"
+          }
+        }
+      }
+    },
+    "/api/admin/draws": {
+      "post": {
+        "tags": [
+          "Draws"
+        ],
+        "summary": "Создание нового тиража",
+        "description": "Создает новый тираж лотереи (только для администраторов)",
+        "operationId": "createDraw",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateDrawRequest"
+              },
+              "examples": {
+                "fiveOutOf36": {
+                  "value": {
+                    "lotteryType": "FIVE_OUT_OF_36",
+                    "startTime": "2024-06-01T12:00:00",
+                    "endTime": "2024-06-01T18:00:00",
+                    "ticketPrice": 100.00
+                  }
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Тираж успешно создан",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DrawDto"
+                },
+                "examples": {
+                  "fiveOutOf36": {
+                    "value": {
+                      "id": "550e8400-e29b-41d4-a716-446655440000",
+                      "lotteryType": "FIVE_OUT_OF_36",
+                      "startTime": "2024-06-01T12:00:00",
+                      "endTime": "2024-06-01T18:00:00",
+                      "status": "ACTIVE",
+                      "ticketPrice": 100.00
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Неверные данные запроса"
+          },
+          "401": {
+            "description": "Неавторизованный доступ"
+          },
+          "403": {
+            "description": "Доступ запрещен (требуется роль ADMIN)"
           }
         }
       }
@@ -77,25 +765,368 @@
     "schemas": {
       "RegisterRequest": {
         "type": "object",
+        "required": [
+          "username",
+          "password"
+        ],
         "properties": {
           "username": {
-            "type": "string"
+            "type": "string",
+            "description": "Имя пользователя",
+            "example": "user@example.com"
           },
           "password": {
-            "type": "string"
+            "type": "string",
+            "description": "Пароль пользователя",
+            "format": "password",
+            "example": "password123"
           }
         }
       },
       "LoginRequest": {
         "type": "object",
+        "required": [
+          "username",
+          "password"
+        ],
         "properties": {
           "username": {
-            "type": "string"
+            "type": "string",
+            "description": "Имя пользователя",
+            "example": "user@example.com"
           },
           "password": {
-            "type": "string"
+            "type": "string",
+            "description": "Пароль пользователя",
+            "format": "password",
+            "example": "password123"
           }
         }
+      },
+      "ReferralCodeResponse": {
+        "type": "object",
+        "properties": {
+          "referralCode": {
+            "type": "string",
+            "description": "Реферальный код пользователя"
+          }
+        }
+      },
+      "ReferralDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Уникальный идентификатор реферала"
+          },
+          "referrerId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "ID пользователя-реферера"
+          },
+          "referrerUsername": {
+            "type": "string",
+            "description": "Имя пользователя-реферера"
+          },
+          "referredId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "ID приглашенного пользователя"
+          },
+          "referredUsername": {
+            "type": "string",
+            "description": "Имя приглашенного пользователя"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Дата и время создания реферала"
+          },
+          "bonusRewarded": {
+            "type": "boolean",
+            "description": "Флаг начисления бонуса"
+          },
+          "bonusAmount": {
+            "type": "number",
+            "format": "double",
+            "description": "Сумма начисленного бонуса"
+          }
+        }
+      },
+      "CreateDrawRequest": {
+        "type": "object",
+        "required": [
+          "lotteryType",
+          "startTime",
+          "endTime",
+          "ticketPrice"
+        ],
+        "properties": {
+          "lotteryType": {
+            "type": "string",
+            "description": "Тип лотереи",
+            "enum": [
+              "FIVE_OUT_OF_36",
+              "SIX_OUT_OF_45"
+            ],
+            "example": "FIVE_OUT_OF_36"
+          },
+          "startTime": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Время начала тиража",
+            "example": "2024-06-01T12:00:00"
+          },
+          "endTime": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Время окончания тиража",
+            "example": "2024-06-01T18:00:00"
+          },
+          "ticketPrice": {
+            "type": "number",
+            "format": "double",
+            "description": "Цена билета",
+            "example": 100.00
+          }
+        }
+      },
+      "CreateTicketRequest": {
+        "type": "object",
+        "required": [
+          "drawId",
+          "numbers"
+        ],
+        "properties": {
+          "drawId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "ID тиража"
+          },
+          "numbers": {
+            "type": "string",
+            "description": "Выбранные номера в билете"
+          }
+        }
+      },
+      "TicketDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Уникальный идентификатор билета"
+          },
+          "userId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "ID владельца билета"
+          },
+          "drawId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "ID тиража"
+          },
+          "numbers": {
+            "type": "string",
+            "description": "Выбранные номера в билете"
+          },
+          "status": {
+            "type": "string",
+            "description": "Статус билета",
+            "enum": [
+              "CREATED",
+              "PAID",
+              "PLAYED",
+              "WON",
+              "LOST"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Дата и время создания билета"
+          }
+        }
+      },
+      "DrawDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Уникальный идентификатор тиража",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "lotteryType": {
+            "type": "string",
+            "description": "Тип лотереи",
+            "enum": [
+              "FIVE_OUT_OF_36",
+              "SIX_OUT_OF_45"
+            ],
+            "example": "FIVE_OUT_OF_36"
+          },
+          "startTime": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Время начала тиража",
+            "example": "2024-06-01T12:00:00"
+          },
+          "endTime": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Время окончания тиража",
+            "example": "2024-06-01T18:00:00"
+          },
+          "status": {
+            "type": "string",
+            "description": "Статус тиража",
+            "enum": [
+              "ACTIVE",
+              "PENDING",
+              "COMPLETED",
+              "CANCELLED"
+            ],
+            "example": "ACTIVE"
+          },
+          "ticketPrice": {
+            "type": "number",
+            "format": "double",
+            "description": "Цена билета",
+            "example": 100.00
+          }
+        }
+      },
+      "CreatePaymentRequest": {
+        "type": "object",
+        "required": [
+          "invoiceId",
+          "cardNumber",
+          "cvc"
+        ],
+        "properties": {
+          "invoiceId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "ID счета для оплаты"
+          },
+          "cardNumber": {
+            "type": "string",
+            "description": "Номер карты (16 цифр)",
+            "pattern": "\\d{16}"
+          },
+          "cvc": {
+            "type": "string",
+            "description": "CVC-код карты (3 цифры)",
+            "pattern": "\\d{3}"
+          }
+        }
+      },
+      "PaymentDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Уникальный идентификатор платежа"
+          },
+          "invoiceId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "ID связанного счета"
+          },
+          "amount": {
+            "type": "number",
+            "format": "double",
+            "description": "Сумма платежа"
+          },
+          "status": {
+            "type": "string",
+            "description": "Статус платежа",
+            "enum": [
+              "PENDING",
+              "COMPLETED",
+              "FAILED",
+              "REFUNDED"
+            ]
+          },
+          "paymentTime": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Дата и время платежа"
+          }
+        }
+      },
+      "InvoiceDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Уникальный идентификатор счета"
+          },
+          "userId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "ID пользователя"
+          },
+          "amount": {
+            "type": "number",
+            "format": "double",
+            "description": "Сумма счета"
+          },
+          "description": {
+            "type": "string",
+            "description": "Описание счета"
+          },
+          "status": {
+            "type": "string",
+            "description": "Статус счета",
+            "enum": [
+              "PENDING",
+              "PAID",
+              "CANCELLED",
+              "EXPIRED"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Дата и время создания счета"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Дата и время истечения счета"
+          }
+        }
+      },
+      "CreateInvoiceRequest": {
+        "type": "object",
+        "required": [
+          "amount",
+          "description"
+        ],
+        "properties": {
+          "amount": {
+            "type": "number",
+            "format": "double",
+            "description": "Сумма счета"
+          },
+          "description": {
+            "type": "string",
+            "description": "Описание счета"
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
       }
     }
   }
