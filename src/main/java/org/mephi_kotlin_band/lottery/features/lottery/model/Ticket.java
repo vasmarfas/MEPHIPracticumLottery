@@ -50,5 +50,4 @@ public class Ticket {
     protected void onCreate() {
         createdAt = LocalDateTime.now();
     }
-}
-
+} 
